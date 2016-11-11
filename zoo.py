@@ -6,7 +6,7 @@ import argparse
 import json
 import base64
 
-parser=argparse.ArgumentParser(prog='WebMap', description='''\
+parser=argparse.ArgumentParser(prog='Zoo', description='''\
 Zoooo
 🐼 🐱 🐯 🐠 🚩
 ''', epilog='方便快捷！')
