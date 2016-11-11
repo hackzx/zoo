@@ -6,5 +6,6 @@
 所以我稱之為動物園。
 
 --
-已支持panda與huomao。  
-douyu驗證機制不明，無法穩定拉取。
+已支持panda、huomao、zhanqi。  
+douyu的m3u8系動態地址，尚未找到規律；
+huya系blob協議，亦不知如何播放。
