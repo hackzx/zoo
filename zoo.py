@@ -29,6 +29,10 @@ def getlive_panda(source):
     data=json.loads(source)
     try:
         live=data['data']['videoinfo']['address']
+        if args.quality=='high':
+            live=live.replace('_small.m3u8', '.m3u8')
+        if args.quality=='low':
+            live=live.replace('.m3u8', '_small.m3u8')
     except:
         print 'can not found this room!'
         exit()
