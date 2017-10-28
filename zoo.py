@@ -19,7 +19,7 @@ def viewsource(url):
     r=requests.Session().get(url)
     source=r.text
     return source
-    
+
 def getlive_panda(source):
     # reg=r'http:\\/\\/pl-hls.*m3u8'
     # reg_m3u8=re.compile(reg)
@@ -36,10 +36,10 @@ def getlive_panda(source):
     except:
         print 'can not found this room!'
         exit()
-    print live
     return live
 
 def getlive_huomao(source):
+    # 另一个获取地址：http://www.huomao.com/outplayer/htmlfive/{0}.html
     reg=r'value=".*"'
     reg_m3u8=re.compile(reg)
     str=re.search(reg_m3u8, source)
@@ -53,7 +53,6 @@ def getlive_huomao(source):
     if args.quality=='low':
         quality='_480'
     live='http://live-ws-hls.huomaotv.cn/live/' + str.group().replace('"','').replace('value','').replace('=', '') + quality + '/playlist.m3u8'
-    print live
     return live
 
 def getlive_zhanqi(source):
@@ -68,11 +67,11 @@ def getlive_zhanqi(source):
     except:
         print 'can not found this room!'
         exit()
-    print live
     return live
 
 def playlive(live):
-    os.system('vlc {0}'.format(live))
+    print 'live:\n{0}\n'.format(live)
+    os.system('mpv {0}'.format(live))
 
 if __name__ == '__main__':
     try:
@@ -84,7 +83,7 @@ if __name__ == '__main__':
             # blob協議，不知如何播放
             print '暂不支持'
             exit()
-        if args.flag=='panda':        
+        if args.flag=='panda':
             source=viewsource('http://room.api.m.panda.tv/index.php?method=room.shareapi&roomid={0}'.format(args.id))
             live=getlive_panda(source)
             playlive(live)
