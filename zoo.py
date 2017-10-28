@@ -69,16 +69,28 @@ def getlive_zhanqi(source):
         exit()
     return live
 
+def getlive_douyu(source):
+    data = json.loads(source)
+    try:
+        roomId = data['data']['room_id']
+        url = 'http://m.douyu.com/html5/live?roomId={0}'.format(roomId)
+        r = requests.Session().get(url)
+        content = json.loads(r.text)
+        live = content['data']['hls_url']
+    except Exception as e:
+        raise e
+    return live
+
 def playlive(live):
     print 'live:\n{0}\n'.format(live)
-    os.system('mpv {0}'.format(live))
+    os.system('mpv \'{0}\''.format(live))
 
 if __name__ == '__main__':
     try:
         if args.flag=='douyu':
-            # m3u8系動態地址，尚未找到規律
-            print '暂不支持'
-            exit()
+            source=viewsource('http://open.douyucdn.cn/api/RoomApi/room/{0}'.format(args.id))
+            live=getlive_douyu(source)
+            playlive(live)
         if args.flag=='huya':
             # blob協議，不知如何播放
             print '暂不支持'
