@@ -7,6 +7,8 @@ import argparse
 import json
 import base64
 import subprocess
+import hashlib
+import time
 
 parser = argparse.ArgumentParser(prog='Zoo', description='''\
 Zoooo
@@ -15,6 +17,7 @@ Zoooo
 parser.add_argument('flag', help='douyu/panda/huomao/zhanqi/huya')
 parser.add_argument('id', help='room\'s id')
 parser.add_argument('-q', '--quality', help='选择视频质量: high/middle/low', default='high')
+# 各平台视频质量办法 https://ws1.sinaimg.cn/large/a1e4b7b5gy1fz0ty368rrj20q50g1taj.jpg
 parser.add_argument('-p', '--player', help='指定播放器: mpv/vlc/iina', default='iina')
 args = parser.parse_args()
 
@@ -92,16 +95,50 @@ def getlive_zhanqi(source):
     return live
 
 
-def getlive_douyu(source):
-    data = json.loads(source)
+# def getlive_douyu(source):
+#     data = json.loads(source)
+#     try:
+#         roomId = data['data']['room_id']
+#         url = 'http://m.douyu.com/html5/live?roomId={0}'.format(roomId)
+#         r = requests.Session().get(url)
+#         content = json.loads(r.text)
+#         live = content['data']['hls_url']
+#     except Exception as e:
+#         raise e
+#     return live
+
+def getlive_douyu(roomid, quality):
+    '''
+    https://gist.github.com/Justsoos/5287887068d902b6d3ed3534a47f3ff3
+    '''
+    roomUrl = 'https://m.douyu.com/room/' + roomid
+    # quality = args.quality
+    req = requests.Session()
+
+    r = req.get(roomUrl)
+    rid = re.search(r'"rid"\s*:\s*(\d+),', r.text).group(1)
+    apiUrl = 'http://www.douyutv.com/api/v1/'
+    para = 'room/{0}?aid=wp&cdn=ws&client_sys=wp&time={1}'.format(rid, int(time.time()))
+    apiUrl += para
+    wsAuth = hashlib.md5((para + 'zNzMV1y4EMxOHS6I5WKm').encode('UTF-8')).hexdigest()
+    apiUrl += '&auth=' + wsAuth
+    r = req.get(apiUrl)
+    data = json.loads(r.text)['data']
+
+    # if data.get('show_status') is not "1":
+        # raise ValueError("Offline")
+
     try:
-        roomId = data['data']['room_id']
-        url = 'http://m.douyu.com/html5/live?roomId={0}'.format(roomId)
-        r = requests.Session().get(url)
-        content = json.loads(r.text)
-        live = content['data']['hls_url']
-    except Exception as e:
-        raise e
+        other_bit = data.get('rtmp_multi_bitrate')
+        if quality == 'low':
+            live = data.get('rtmp_url') + '/' + other_bit.get('middle')
+        elif quality == 'middle':
+            live = data.get('rtmp_url') + '/' + other_bit.get('middle2')
+        else:
+            live = data.get('rtmp_url') + '/' + data.get('rtmp_live')
+    except:
+        live = data.get('hls_url')
+
     return live
 
 
@@ -131,9 +168,14 @@ def getlive_huya(source):
 
 if __name__ == '__main__':
     try:
+        # if args.flag == 'douyu':
+        #     source = viewsource('http://open.douyucdn.cn/api/RoomApi/room/{0}'.format(args.id))
+        #     live = getlive_douyu(source)
+        #     playlive(live)
+
         if args.flag == 'douyu':
-            source = viewsource('http://open.douyucdn.cn/api/RoomApi/room/{0}'.format(args.id))
-            live = getlive_douyu(source)
+            # source = viewsource('http://open.douyucdn.cn/api/RoomApi/room/{0}'.format(args.id))
+            live = getlive_douyu(args.id, args.quality)
             playlive(live)
         if args.flag == 'huya':
             source = viewsource('http://www.huya.com/{0}'.format(args.id))

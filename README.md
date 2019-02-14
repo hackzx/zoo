@@ -6,6 +6,6 @@
 
 ------
 
-- 已支持panda、huomao、zhanqi、huya。 
+- 已支持 panda、huomao、zhanqi、huya、douyu。
 - ~~douyu的m3u8系時限URI，尚無解決方案。~~（`you-get -p iina https://www.douyu.com/60937` 一行搞定！）
 
